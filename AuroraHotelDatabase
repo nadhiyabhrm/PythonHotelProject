@@ -1,0 +1,74 @@
+create database AuroraHotel
+use AuroraHotel
+
+create table Room_Info(
+Room_No int primary key not null,
+Room_Type varchar(25) not null check(Room_Type = 'Standard Non-AC' or Room_Type = 'Standard AC' or Room_Type = '3-Bed Non-AC' or Room_Type = '3-Bed AC'),
+Room_Facility varchar(300) not null,
+Price_Perday int check(Price_Perday >= 60),
+Room_Status varchar(25) default 'available' check (Room_Status = 'available' or Room_Status = 'not available'))
+
+insert Room_Info values
+(01, 'Standard Non-AC', 'Room amenities include: 1 Double Bed, Television, Telephone, Double-Door Cupboard, 1 Coffee table with 2 sofa, Balcony and an attached washroom with hot/cold water.', 60, 'available'),
+(02, 'Standard Non-AC', 'Room amenities include: 1 Double Bed, Television, Telephone, Double-Door Cupboard, 1 Coffee table with 2 sofa, Balcony and an attached washroom with hot/cold water.', 60, 'available'),
+(03, 'Standard Non-AC', 'Room amenities include: 1 Double Bed, Television, Telephone, Double-Door Cupboard, 1 Coffee table with 2 sofa, Balcony and an attached washroom with hot/cold water.', 60, 'available'),
+(04, 'Standard Non-AC', 'Room amenities include: 1 Double Bed, Television, Telephone, Double-Door Cupboard, 1 Coffee table with 2 sofa, Balcony and an attached washroom with hot/cold water.', 60, 'available'),
+(05, 'Standard Non-AC', 'Room amenities include: 1 Double Bed, Television, Telephone, Double-Door Cupboard, 1 Coffee table with 2 sofa, Balcony and an attached washroom with hot/cold water.', 60, 'available'),
+(06, 'Standard AC', 'Room amenities include: 1 Double Bed, Television, Telephone, Double-Door Cupboard, 1 Coffee table with 2 sofa, Balcony and an attached washroom with hot/cold water + Window/Split AC.', 80, 'available'),
+(07, 'Standard AC', 'Room amenities include: 1 Double Bed, Television, Telephone, Double-Door Cupboard, 1 Coffee table with 2 sofa, Balcony and an attached washroom with hot/cold water + Window/Split AC.', 80, 'available'),
+(08, 'Standard AC', 'Room amenities include: 1 Double Bed, Television, Telephone, Double-Door Cupboard, 1 Coffee table with 2 sofa, Balcony and an attached washroom with hot/cold water + Window/Split AC.', 80, 'available'),
+(09, 'Standard AC', 'Room amenities include: 1 Double Bed, Television, Telephone, Double-Door Cupboard, 1 Coffee table with 2 sofa, Balcony and an attached washroom with hot/cold water + Window/Split AC.', 80, 'available'),
+(10, 'Standard AC', 'Room amenities include: 1 Double Bed, Television, Telephone, Double-Door Cupboard, 1 Coffee table with 2 sofa, Balcony and an attached washroom with hot/cold water + Window/Split AC.', 80, 'available'),
+(11, '3-Bed Non-AC', 'Room amenities include: 1 Double Bed + 1 Single Bed, Television, Telephone, a Triple-Door Cupboard, 1 Coffee table with 2 sofa, 1 Side table, Balcony with an Accent table with 2 Chair and an attached washroom with hot/cold water.', 150, 'available'),
+(12, '3-Bed Non-AC', 'Room amenities include: 1 Double Bed + 1 Single Bed, Television, Telephone, a Triple-Door Cupboard, 1 Coffee table with 2 sofa, 1 Side table, Balcony with an Accent table with 2 Chair and an attached washroom with hot/cold water.', 150, 'available'),
+(13, '3-Bed Non-AC', 'Room amenities include: 1 Double Bed + 1 Single Bed, Television, Telephone, a Triple-Door Cupboard, 1 Coffee table with 2 sofa, 1 Side table, Balcony with an Accent table with 2 Chair and an attached washroom with hot/cold water.', 150, 'available'),
+(14, '3-Bed Non-AC', 'Room amenities include: 1 Double Bed + 1 Single Bed, Television, Telephone, a Triple-Door Cupboard, 1 Coffee table with 2 sofa, 1 Side table, Balcony with an Accent table with 2 Chair and an attached washroom with hot/cold water.', 150, 'available'),
+(15, '3-Bed Non-AC', 'Room amenities include: 1 Double Bed + 1 Single Bed, Television, Telephone, a Triple-Door Cupboard, 1 Coffee table with 2 sofa, 1 Side table, Balcony with an Accent table with 2 Chair and an attached washroom with hot/cold water.', 150, 'available'),
+(16, '3-Bed AC', 'Room amenities include: 1 Double Bed + 1 Single Bed, Television,Telephone, a Triple-Door Cupboard,1 Coffee table with 2 sofa,  1 Side table, Balcony with an Accent table with 2 Chair and an attached washroom with hot/cold water + Window/Split AC.', 180, 'available'),
+(17, '3-Bed AC', 'Room amenities include: 1 Double Bed + 1 Single Bed, Television,Telephone, a Triple-Door Cupboard,1 Coffee table with 2 sofa,  1 Side table, Balcony with an Accent table with 2 Chair and an attached washroom with hot/cold water + Window/Split AC.', 180, 'available'),
+(18, '3-Bed AC', 'Room amenities include: 1 Double Bed + 1 Single Bed, Television,Telephone, a Triple-Door Cupboard,1 Coffee table with 2 sofa,  1 Side table, Balcony with an Accent table with 2 Chair and an attached washroom with hot/cold water + Window/Split AC.', 180, 'available'),
+(19, '3-Bed AC', 'Room amenities include: 1 Double Bed + 1 Single Bed, Television,Telephone, a Triple-Door Cupboard,1 Coffee table with 2 sofa,  1 Side table, Balcony with an Accent table with 2 Chair and an attached washroom with hot/cold water + Window/Split AC.', 180, 'available'),
+(20, '3-Bed AC', 'Room amenities include: 1 Double Bed + 1 Single Bed, Television,Telephone, a Triple-Door Cupboard,1 Coffee table with 2 sofa,  1 Side table, Balcony with an Accent table with 2 Chair and an attached washroom with hot/cold water + Window/Split AC.', 180, 'available')
+
+create table Menu(Order_No int primary key identity(1,1), 
+Menu_Type varchar(10) not null check(Menu_Type = 'Breakfast' or Menu_Type = 'Lunch' or Menu_Type = 'Dinner' or Menu_Type = 'Snack'),
+Menu_Description varchar(30) not null, Food_Price float not null check(Food_Price > 0))
+
+insert Menu values('Breakfast', 'Nasi Lemak', 2.00), ('Breakfast', 'Roti Canai', 2.00), ('Breakfast', 'Nasi Goreng', 5.00), ('Breakfast', 'Mi Goreng', 5.00), ('Breakfast', 'Dosa', 2.00)
+insert Menu values('Lunch', 'White Rice + Chicken Rendang', 12.50), ('Lunch', 'Nasi Ayam', 10.40), ('Lunch', 'Nasi Arab', 15.80), ('Lunch', 'Fish Head Curry', 25.00), ('Lunch', 'Mi Curry', 8.00) 
+insert Menu values('Dinner', 'Char Kuey Tiaw', 7.00), ('Dinner', 'Chicken Chop', 5.00), ('Dinner', 'Pizza', 20.00), ('Dinner', 'Capati', 1.00), ('Dinner', 'Salad', 4.30)
+insert Menu values('Snack', 'Mr.Potato', 3.50), ('Snack', 'Milo', 4.00), ('Snack', 'Nescafe', 4.70), ('Snack', 'Teh Tarik', 4.70), ('Snack', 'Karipap', 1.00), ('Snack', 'Apple', 2.00), ('Snack', 'Water', 1.00)
+
+create table Customer_Info(
+Customer_id	int primary key identity(1,1),
+Customer_ic_passport varchar(14) unique not null check(len(Customer_ic_passport)>=8 and len(Customer_ic_passport)<=14),
+Customer_name varchar(50) not null,
+Customer_age int check (Customer_age > 0),
+Customer_address varchar(100) not null,
+Customer_postal_code varchar(6)	not null,
+Customer_email	Varchar(25)	not null,
+Customer_phone	Varchar(12)	not null)
+
+create table Payment_Info(
+Customer_id	int	foreign key references Customer_Info on update cascade on delete cascade,
+Room_no	int	foreign key references Room_Info(Room_No) on update cascade on delete cascade,
+Check_in date not null,
+Check_out date not null,
+Rent_day as datediff(day, Check_in, Check_out),
+Additional_day int default 0,
+Hotel_fee float default 0,
+Restaurant_fee float default 0,
+Total_price float default 0,
+Payment_Status varchar(10) default 'unpaid')
+
+create table Booking_Info(
+Customer_id	int	foreign key references Customer_Info(Customer_id) on update cascade on delete cascade,
+Check_in	date	Not Null,
+Check_out	date	Not Null,
+Room_no	int	foreign key references Room_Info(Room_No),
+Additional_day	int	Default 0)
+
+create table Restaurant_Fee(
+Customer_id	int	foreign key references Customer_Info  on update cascade on delete cascade,
+Order_no int identity(1,1) primary key,
+Total_price	float default 0)
