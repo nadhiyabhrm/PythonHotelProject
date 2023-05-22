@@ -1,0 +1,456 @@
+# import random
+
+# SQL CONNECTION FUNCTION - DONE
+def SQLConnection():
+    global cursor
+    global conn
+    import pyodbc
+    conn = pyodbc.connect(
+        'Driver={SQL Server};'
+        'Server=DESKTOP-MOEH8DR\SQLEXPRESS02;'
+        'Database=AuroraHotel;'
+        'Trusted_Connection=yes;')
+    cursor = conn.cursor()
+
+
+# HOME FUNCTION - DONE
+def Home():
+    print("\n\t\t\t\t\t\t WELCOME TO AuroraHotel\n")
+    print("\t\t\t 1 Booking\n")
+    print("\t\t\t 2 Rooms Info\n")
+    print("\t\t\t 3 Room Service(Menu Card)\n")
+    print("\t\t\t 4 Payment\n")
+    print("\t\t\t 5 Record\n")
+    print("\t\t\t 6 Generate Report for Customer Total Payment\n")
+    print("\t\t\t 0 Exit\n")
+
+    ch = int(input("->"))
+
+    if ch == 1:
+        print(" ")
+        Booking()
+
+    elif ch == 2:
+        print(" ")
+        Rooms_Info()
+
+    elif ch == 3:
+        print(" ")
+        restaurant()
+
+    elif ch == 4:
+        print(" ")
+        Payment()
+
+    elif ch == 5:
+        print(" ")
+        Record()
+
+    elif ch == 6:
+        print(" ")
+        Generate_Report()
+
+    else:
+        exit()
+
+
+# BOOKING FUNCTION - DONE
+def Booking():
+    global eid
+    ic = input('Enter your IC or passport number. \nPlease do not use - in ic and use upper case for passport letter.\t')
+    if len(ic)>=8 and len(ic)<=14:
+        SQLConnection()
+        cursor.execute('select * from Customer_Info where Customer_ic_passport = ?', ic)
+        result = cursor.fetchall()
+        for x in result:
+            print('Your data already in the system')
+            break
+        else:
+            name = input("Enter your name\t")
+            age = int(input("Enter your age\t"))
+            add = input("Enter your address\t")
+            pcode = input("Enter your post code\t")
+            email = input("Enter your email\t")
+            phno = input("Enter your phone number\t")
+            cursor.execute('insert Customer_Info values(?, ?, ?, ?, ?, ?, ?)', ic, name, age, add, pcode, email, phno)
+            conn.commit()
+            print('Your information has been added in the system')
+        ans = input('Press y to start booking.\t')
+        if ans == 'y' or ans == 'Y':  # To booking
+            cursor.execute('select * from Customer_Info where Customer_ic_passport = ?', ic)
+            result = cursor.fetchall()
+            for x in result:  # to assign customer id
+                eid = x.Customer_id
+                # break
+            ci = input('Enter your check in date. Example yyyy/mm/dd\t')
+            co = (input('Enter your check out date. Example yyyy/mm/dd\t'))
+            room = int(input('Enter room number.\t'))
+            cursor.execute('select * from Room_Info where Room_No = ?', room)
+            result = cursor.fetchall()
+            for j in result:
+                if j.Room_Status == 'available':
+                    cursor.execute("insert Payment_Info values(?, ?, ?, ?, 0, 0, 0, 0, 'unpaid')", eid, room, ci, co)
+                    conn.commit()
+                    if j.Room_Type == 'Standard Non-AC':
+                        cursor.execute("update Payment_Info set Room_no = ?, Check_in = ?, Check_out = ?, Hotel_fee = 60, Payment_Status= 'unpaid' where Customer_id = ?", room, ci, co, eid)
+                        conn.commit()
+                    elif j.Room_Type == 'Standard AC':
+                        cursor.execute("update Payment_Info set Room_no = ?, Check_in = ?, Check_out = ?, Hotel_fee = 80, Payment_Status= 'unpaid' where Customer_id = ?", room, ci, co, eid)
+                        conn.commit()
+                    elif j.Room_Type == '3-Bed Non-AC':
+                        cursor.execute("update Payment_Info set Room_no = ?, Check_in = ?, Check_out = ?, Hotel_fee = 150, Payment_Status= 'unpaid' where Customer_id = ?", room, ci, co, eid)
+                        conn.commit()
+                    else:
+                        cursor.execute("update Payment_Info set Room_no = ?, Check_in = ?, Check_out = ?, Hotel_fee = 180, Payment_Status= 'unpaid' where Customer_id = ?", room, ci, co, eid)
+                        conn.commit()
+                    cursor.execute('select * from Payment_Info where Customer_id = ?', eid)
+                    result = cursor.fetchall()
+                    for x in result:  # to assign total price
+                        global tot_price
+                        tot_price = x.Restaurant_fee + (x.Hotel_fee * (x.Rent_day + x.Additional_day))
+                    cursor.execute("update Payment_Info set Total_price = ? where Customer_id = ?", tot_price, eid)
+                    cursor.execute("update Room_Info set Room_Status = 'not available' where Room_No = ?", room)
+                    conn.commit()
+                    print('Booked successfully')
+                else:
+                    print('Sorry, room is not available.\nPlease check in Room Info')
+            n = int(input("0-BACK\n ->"))
+            if n == 0:
+                Home()
+            else:
+                exit()
+            Home()
+    else:
+        print("Please insert more than 8 and below 14 character")
+        n = int(input("0-BACK\n ->"))
+        if n == 0:
+            Home()
+        else:
+            exit()
+
+
+# ROOMS INFO -DONE
+def Rooms_Info():
+    print("         ------ HOTEL ROOMS INFO ------")
+    print("")
+    print("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+    SQLConnection()
+    cursor.execute('select Room_Type, Room_Facility from Room_Info where Room_No = 01')
+    result = cursor.fetchall()
+    for x in result:
+        print(x.Room_Type)
+        print(x.Room_Facility)
+    print("Room No \t Room Price \t Room Status")
+    cursor.execute('select Room_No, Price_Perday, Room_Status from Room_Info where Room_No between 01 and 05')
+    result = cursor.fetchall()
+    for x in result:
+        print("", x.Room_No, "\t\t\t|", x.Price_Perday, "\t\t|", x.Room_Status)
+    print("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+    cursor.execute('select Room_Type, Room_Facility from Room_Info where Room_No = 06')
+    result = cursor.fetchall()
+    for x in result:
+        print(x.Room_Type)
+        print(x.Room_Facility)
+    print("Room No \t Room Price \t Room Status")
+    cursor.execute('select Room_No, Price_Perday, Room_Status from Room_Info where Room_No between 06 and 10')
+    result = cursor.fetchall()
+    for x in result:
+        print("", x.Room_No, "\t\t\t|", x.Price_Perday, "\t\t|", x.Room_Status)
+    print("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+    cursor.execute('select Room_Type, Room_Facility from Room_Info where Room_No = 11')
+    result = cursor.fetchall()
+    for x in result:
+        print(x.Room_Type)
+        print(x.Room_Facility)
+    print("Room No \t Room Price \t Room Status")
+    cursor.execute('select Room_No, Price_Perday, Room_Status from Room_Info where Room_No between 11 and 15')
+    result = cursor.fetchall()
+    for x in result:
+        print("", x.Room_No, "\t\t|", x.Price_Perday, "\t\t|", x.Room_Status)
+    print("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+    cursor.execute('select Room_Type, Room_Facility from Room_Info where Room_No = 16')
+    result = cursor.fetchall()
+    for x in result:
+        print(x.Room_Type)
+        print(x.Room_Facility)
+    print("Room No \t Room Price \t Room Status")
+    cursor.execute('select Room_No, Price_Perday, Room_Status from Room_Info where Room_No between 16 and 20')
+    result = cursor.fetchall()
+    for x in result:
+        print("", x.Room_No, "\t\t|", x.Price_Perday, "\t\t|", x.Room_Status)
+    print()
+    n = int(input("0-BACK\n ->"))
+    if n == 0:
+        Home()
+    else:
+        exit()
+
+
+# MENU FUNCTION - DONE
+def Menu():
+    print("-------------------------------------------------------------------------")
+    print("                           AuroraHotel")
+    print("-------------------------------------------------------------------------")
+    print("                            Menu Card")
+    print("-------------------------------------------------------------------------")
+    SQLConnection()
+    cursor.execute('select Menu_Type from Menu where Order_No = 1')
+    result = cursor.fetchall()
+    for x in result:
+        print("\t\t\t\t", x.Menu_Type)
+    print("Order No \t Description \t Price")
+    cursor.execute('select Order_No, Menu_Description, Food_Price from Menu where Order_No between 01 and 05')
+    result = cursor.fetchall()
+    for x in result:
+        print("", x.Order_No, "\t\t\t|", x.Menu_Description, "\t\t|", x.Food_Price)
+    print("-------------------------------------------------------------------------")
+    SQLConnection()
+    cursor.execute('select Menu_Type from Menu where Order_No = 6')
+    result = cursor.fetchall()
+    for x in result:
+        print("\t\t\t\t", x.Menu_Type)
+    print("Order No \t Description \t Price")
+    cursor.execute('select Order_No, Menu_Description, Food_Price from Menu where Order_No between 6 and 10')
+    result = cursor.fetchall()
+    for x in result:
+        print("", x.Order_No, "\t\t\t|", x.Menu_Description, "\t\t|", x.Food_Price)
+    print("-------------------------------------------------------------------------")
+    SQLConnection()
+    cursor.execute('select Menu_Type from Menu where Order_No = 11')
+    result = cursor.fetchall()
+    for x in result:
+        print("\t\t\t\t", x.Menu_Type)
+    print("Order No \t Description \t Price")
+    cursor.execute('select Order_No, Menu_Description, Food_Price from Menu where Order_No between 11 and 17')
+    result = cursor.fetchall()
+    for x in result:
+        print("", x.Order_No, "\t\t\t|", x.Menu_Description, "\t\t|", x.Food_Price)
+    print("-------------------------------------------------------------------------")
+    SQLConnection()
+    cursor.execute('select Menu_Type from Menu where Order_No = 18')
+    result = cursor.fetchall()
+    for x in result:
+        print("\t\t\t\t", x.Menu_Type)
+    print("Order No \t Description \t Price")
+    cursor.execute('select Order_No, Menu_Description, Food_Price from Menu where Order_No between 18 and 22')
+    result = cursor.fetchall()
+    for x in result:
+        print("", x.Order_No, "\t\t\t|", x.Menu_Description, "\t\t|", x.Food_Price)
+    print("Press 0 -to end ")
+
+
+# RESTAURANT FUNCTION - DONE
+def restaurant():
+    global cid
+    global i
+    try:
+        ph = int(input("Customer Id: "))
+        SQLConnection()
+        cursor.execute('select * from Customer_Info')
+        result = cursor.fetchall()
+        for x in result:
+            cid = x.Customer_id
+        r = 0
+        if ph == cid:
+            Menu()
+            ch = 1
+            while ch != 0:
+                ch = int(input(" -> "))
+
+                # if-elif-conditions to assign item
+                # prices listed in menu card
+                if ch == 1 or ch == 2 or ch == 5 or ch == 16:
+                    rs = 2
+                    r = r + rs
+                elif ch == 3 or ch == 4 or ch == 19:
+                    rs = 5
+                    r = r + rs
+                elif ch == 6:
+                    rs = 12.5
+                    r = r + rs
+                elif ch == 7:
+                    rs = 10.4
+                    r = r + rs
+                elif ch == 8:
+                    rs = 15.8
+                    r = r + rs
+                elif ch == 9:
+                    rs = 25
+                    r = r + rs
+                elif ch == 10:
+                    rs = 8
+                    r = r + rs
+                elif ch == 11:
+                    rs = 3.5
+                    r = r + rs
+                elif ch == 12:
+                    rs = 4
+                    r = r + rs
+                elif ch == 13 or ch == 14:
+                    rs = 4.7
+                    r = r + rs
+                elif ch == 18:
+                    rs = 7
+                    r = r + rs
+                elif ch == 20:
+                    rs = 20
+                    r = r + rs
+                elif ch == 21 or ch == 1 or ch == 17:
+                    rs = 1
+                    r = r + rs
+                elif ch == 22:
+                    rs = 4.3
+                    r = r + rs
+                elif ch == 0:
+                    pass
+                else:
+                    print("Wrong Choice..!!")
+            print("Total Bill: ", r)
+            cursor.execute('update Payment_Info set Restaurant_fee = Restaurant_fee + ? where Customer_id = ?', r, cid)
+            conn.commit()
+            print('Your bill has been updated. Enjoy your meal. Thank you.')
+        else:
+            print("Invalid Customer Id")
+            pass
+    except Exception as ex:
+        print(ex)
+    n = int(input("0-BACK\n ->"))
+    if n == 0:
+        Home()
+    else:
+        exit()
+
+
+# RECORD FUNCTION - DONE
+def Record():
+    try:
+        print("        *** HOTEL RECORD ***\n")
+        print("| ID          | Name        | Phone No.        | Address       | Check-In      | Check-Out     | Total Amount      | Payment Status")
+        print(
+            "----------------------------------------------------------------------------------------------------------------------")
+        SQLConnection()
+        cursor.execute('''  select Customer_Info.Customer_id, Customer_name, Customer_phone, Customer_address, Check_in, Check_out, Total_price, Payment_Status , Restaurant_fee, Hotel_fee, Rent_day, Additional_day
+                            from Customer_Info left join Payment_Info
+                            on Customer_Info.Customer_id = Payment_Info.Customer_id''')
+        result = cursor.fetchall()
+        for x in result:
+            x.Total_price = x.Restaurant_fee + (x.Hotel_fee * (x.Rent_day + x.Additional_day))
+            print("|", x.Customer_id, "\t\t|", x.Customer_name, "\t\t\t|", x.Customer_phone, "\t\t|", x.Customer_address, "\t\t|", x.Check_in, "\t\t|", x.Check_out, "\t\t|", x.Total_price, "\t\t|", x.Payment_Status)
+    except Exception as ex:
+        print(ex)
+    n = int(input("0-BACK\n ->"))
+    if n == 0:
+        Home()
+    else:
+        exit()
+
+
+# PAYMENT FUNCTION
+def Payment():
+    global tprice
+    try:
+        ic = int(input('Enter your customer ID\t'))
+        SQLConnection()
+        cursor.execute('select Customer_id, Room_no from Payment_Info where Customer_id = ?', ic)
+        result = cursor.fetchall()
+        for x in result:
+            print(x.Customer_id)
+            if ic == x.Customer_id:
+                roomno = x.Room_no
+                # break
+                exday = int(input('Enter number of day to extend\t'))
+                cursor.execute('update Payment_Info set Additional_day = ? where Customer_id = ?', exday, ic)
+                cursor.execute('select * from Payment_Info where Customer_id = ?', ic)
+                result = cursor.fetchall()
+                for x in result:
+                    tprice = x.Restaurant_fee + (x.Hotel_fee * (x.Rent_day + x.Additional_day))
+                    print(" Payment")
+                    print(" --------------------------------")
+                    print("  MODE OF PAYMENT")
+                    print("  1- Credit/Debit Card")
+                    print("  2- Paytm/PhonePe")
+                    print("  3- Using UPI")
+                    print("  4- Cash")
+                    x = int(input("-> "))
+                    print("\n  Amount: ", tprice)
+                    print("\n            Pay For AuroraHotel")
+                    print("  (y/n)")
+                    ch = str(input("->"))
+                    cursor.execute('update Payment_Info set Total_price = ? where Customer_id = ?', tprice, ic)
+                    conn.commit()
+                    if ch == 'y' or ch == 'Y':
+                        cursor.execute('''select Customer_Info.Customer_name, Customer_Info.Customer_phone, 
+                                          Customer_Info.Customer_address, Check_in, Check_out, 
+                                          Total_price, Restaurant_fee, Payment_Status, Rent_day
+                                          from Customer_Info left join Payment_Info
+                                          on Customer_Info.Customer_id = Payment_Info.Customer_id''')
+                        result = cursor.fetchall()
+                        for x in result:
+                            status = x.Payment_Status
+                            if status == 'unpaid':
+                                print("\n\n --------------------------------")
+                                print("           AuroraHotel")
+                                print(" --------------------------------")
+                                print("              Bill")
+                                print(" --------------------------------")
+                                print(" Name: ", x.Customer_name, "\t\n Phone No.: ", x.Customer_phone, "\t\n Address: ", x.Customer_address, "\t")
+                                print("\n Check-In: ", x.Check_in, "\t\n Check-Out: ", x.Check_out, "\t")
+                                print(" Restaurant Charges: \t", x.Restaurant_fee)
+                                print(" --------------------------------")
+                                print("\n Total Amount: ", tprice, "\t")
+                                print(" --------------------------------")
+                                print("          Thank You")
+                                print("          Visit Again :)")
+                                print(" --------------------------------\n")
+                                cursor.execute("update Payment_Info set Payment_Status = 'paid' where Customer_id = ?", ic)
+                                conn.commit()
+                                cursor.execute("update Room_Info set Room_Status = 'available' where Room_No = ?", roomno)
+                                conn.commit()
+                        else:
+                            print("\n\tPayment has been made before:)\n\n")
+            else:
+                print('Invalid ID')
+                n = int(input("0-BACK\n ->"))
+                if n == 0:
+                    Home()
+                else:
+                    exit()
+    except Exception as ex:
+        print(ex)
+    n = int(input("0-BACK\n ->"))
+    if n == 0:
+        Home()
+    else:
+        exit()
+
+
+def Generate_Report():
+    import matplotlib.pyplot as plt
+    import numpy as np
+    try:
+        SQLConnection()
+        cursor.execute('select Customer_id, Total_price from Payment_Info')
+        result = cursor.fetchall()
+
+        font1 = {'family': 'serif', 'color': 'blue', 'size': 20}
+        font2 = {'family': 'serif', 'color': 'darkred', 'size': 15}
+        plt.title("Customer Total Payment Report", fontdict=font1)
+        plt.xlabel("Customer ID", fontdict=font2)
+        plt.ylabel("Total Payment", fontdict=font2)
+
+        x = np.array([x[0] for x in result])
+        y = np.array([x[1] for x in result])
+
+        plt.bar(x, y, color="blue")
+        plt.show()
+        n = int(input("0-BACK\n ->"))
+        if n == 0:
+            Home()
+        else:
+            exit()
+    except Exception as ex:
+        print(ex)
+
+
+# DRIVER CODE
+Home()
